@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-  
+
 <head>
 <meta charset="UTF-8">
 <title>Happy New Year 2026 🎆</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="icon" href="DHLR.ico">
 
 <!-- Fonts -->
 <link href="https://fonts.googleapis.com/css2?family=Bilbo+Swash+Caps&family=Poppins:wght@600&display=swap" rel="stylesheet">
@@ -104,7 +105,7 @@ function enableSound() {
 window.addEventListener("touchstart", enableSound, { once:true });
 window.addEventListener("click", enableSound, { once:true });
 
-// Resize (mobile + DPR)
+// Resize (mobile )
 function resize() {
   const dpr = window.devicePixelRatio || 1;
   canvas.width = innerWidth * dpr;
@@ -159,7 +160,7 @@ function explode(fw) {
 
 let frame = 0;
 function animate() {
-  // TRUE NIGHT SKY (no color overlay)
+  // TRUE NIGHT SKY 
   ctx.clearRect(0, 0, innerWidth, innerHeight);
 
   if (frame % 28 === 0) launchFirework();
