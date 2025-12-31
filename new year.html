@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  
+<head>
+<meta charset="UTF-8">
+<title>Happy New Year 2026 🎆</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Bilbo+Swash+Caps&family=Poppins:wght@600&display=swap" rel="stylesheet">
+
+<style>
+html, body {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  overflow: hidden;
+  font-family: 'Poppins', sans-serif;
+  touch-action: manipulation;
+}
+
+canvas {
+  position: fixed;
+  inset: 0;
+}
+
+.popup-container {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -70%);
+  text-align: center;
+  z-index: 10;
+  pointer-events: none;
+}
+
+.popup-title {
+  font-family: 'Bilbo Swash Caps', cursive;
+  font-size: clamp(60px, 10vw, 110px);
+  background: linear-gradient(90deg, #ffffff, #ffd700, #ff6fae);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 40px rgba(255,215,0,0.8);
+  animation: float 6s ease-in-out infinite;
+}
+
+.popup-subtitle {
+  font-size: clamp(18px, 4vw, 38px);
+  color: #ffffff;
+  text-shadow: 0 0 14px rgba(255,255,255,0.8);
+}
+
+@keyframes float {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-12px); }
+}
+
+/* Mobile hint */
+.tap-hint {
+  position: fixed;
+  bottom: 16px;
+  width: 100%;
+  text-align: center;
+  color: #ccc;
+  font-size: 14px;
+  z-index: 20;
+}
+</style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+
+<div class="popup-container">
+  <div class="popup-title">Happy New Year SR</div>
+  <div class="popup-subtitle">Welcome 2026 🎆</div>
+</div>
+
+<div class="tap-hint"></div>
+
+<!-- Firework sound -->
+<audio id="fireSound" preload="auto">
+  <source src="https://assets.mixkit.co/sfx/preview/mixkit-firework-explosion-1700.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const canvas = document.getElementById("canvas");
+const ctx = canvas.getContext("2d");
+const fireSound = document.getElementById("fireSound");
+
+let soundEnabled = false;
+
+// Enable sound on first user interaction (mobile safe)
+function enableSound() {
+  if (!soundEnabled) {
+    fireSound.play().then(() => {
+      fireSound.pause();
+      fireSound.currentTime = 0;
+      soundEnabled = true;
+      document.querySelector(".tap-hint").style.display = "none";
+    }).catch(()=>{});
+  }
+}
+window.addEventListener("touchstart", enableSound, { once:true });
+window.addEventListener("click", enableSound, { once:true });
+
+// Resize (mobile + DPR)
+function resize() {
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = innerWidth * dpr;
+  canvas.height = innerHeight * dpr;
+  canvas.style.width = innerWidth + "px";
+  canvas.style.height = innerHeight + "px";
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+}
+resize();
+window.addEventListener("resize", resize);
+
+// Firework system
+const fireworks = [];
+const particles = [];
+const COLORS = ["#ff0043","#ffd700","#1e90ff","#00ffff","#ff6fae","#ff8c00"];
+
+function launchFirework() {
+  fireworks.push({
+    x: Math.random() * innerWidth,
+    y: innerHeight + 20,
+    vx: (Math.random() - 0.5) * 1.8,
+    vy: -(Math.random() * 6 + 14),
+    targetY: Math.random() * innerHeight * 0.45 + 80,
+    color: COLORS[Math.floor(Math.random() * COLORS.length)]
+  });
+}
+
+function explode(fw) {
+  if (soundEnabled) {
+    fireSound.currentTime = 0;
+    fireSound.play();
+  }
+
+  const count = Math.floor(Math.random() * 40) + 60;
+  for (let i = 0; i < count; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = Math.random() * 5 + 2;
+
+    particles.push({
+      x: fw.x,
+      y: fw.y,
+      vx: Math.cos(angle) * speed,
+      vy: Math.sin(angle) * speed,
+      alpha: 1,
+      radius: Math.random() * 2 + 1.5,
+      color: fw.color,
+      gravity: 0.04,
+      fade: Math.random() * 0.015 + 0.008
+    });
+  }
+}
+
+let frame = 0;
+function animate() {
+  // TRUE NIGHT SKY (no color overlay)
+  ctx.clearRect(0, 0, innerWidth, innerHeight);
+
+  if (frame % 28 === 0) launchFirework();
+
+  // Rockets
+  for (let i = fireworks.length - 1; i >= 0; i--) {
+    const fw = fireworks[i];
+    fw.x += fw.vx;
+    fw.y += fw.vy;
+    fw.vy += 0.18;
+
+    ctx.beginPath();
+    ctx.arc(fw.x, fw.y, 3.5, 0, Math.PI * 2);
+    ctx.fillStyle = fw.color;
+    ctx.shadowColor = fw.color;
+    ctx.shadowBlur = 18;
+    ctx.fill();
+
+    if (fw.y <= fw.targetY) {
+      explode(fw);
+      fireworks.splice(i, 1);
+    }
+  }
+
+  // Explosion particles
+  for (let i = particles.length - 1; i >= 0; i--) {
+    const p = particles[i];
+    p.x += p.vx;
+    p.y += p.vy;
+    p.vy += p.gravity;
+    p.alpha -= p.fade;
+
+    if (p.alpha <= 0) {
+      particles.splice(i, 1);
+      continue;
+    }
+
+    ctx.save();
+    ctx.globalAlpha = p.alpha;
+    ctx.beginPath();
+    ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+    ctx.fillStyle = p.color;
+    ctx.shadowColor = p.color;
+    ctx.shadowBlur = 12;
+    ctx.fill();
+    ctx.restore();
+  }
+
+  frame++;
+  requestAnimationFrame(animate);
+}
+
+animate();
+</script>
+</body>
+</html>
